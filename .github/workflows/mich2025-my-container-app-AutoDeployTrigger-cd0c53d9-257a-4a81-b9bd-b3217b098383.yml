@@ -1,0 +1,44 @@
+name: Trigger auto deployment for mich2025-my-container-app
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - '**'
+    - '.github/workflows/mich2025-my-container-app-AutoDeployTrigger-cd0c53d9-257a-4a81-b9bd-b3217b098383.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:
+      
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.MICH2025MYCONTAINERAPP_AZURE_CREDENTIALS }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }}
+          _dockerfilePathKey_: _dockerfilePath_
+          registryUrl: michelinmycontainerregistry.azurecr.io
+          registryUsername: ${{ secrets.MICH2025MYCONTAINERAPP_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.MICH2025MYCONTAINERAPP_REGISTRY_PASSWORD }}
+          containerAppName: mich2025-my-container-app
+          resourceGroup: mich2025-rg-my-container-apps
+          imageToBuild: michelinmycontainerregistry.azurecr.io/mich2025-my-container-app:${{ github.sha }}
+          
+            
+
+     
+
